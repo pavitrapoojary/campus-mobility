@@ -217,3 +217,4 @@ campus-mobility/
 
 * **Project**: Campus Mobility Innovation & Entrepreneurship Project (MBA 2025)
 * **Focus Area**: Sustainable Campus Transportation, Micro-mobility, Lean Startup Operations.
+* **Repository**: [https://github.com/pavitrapoojary/campus-mobility](https://github.com/pavitrapoojary/campus-mobility)

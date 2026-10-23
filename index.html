@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Campus Cycles: MVP clickable prototype</title>
+<style>
+:root{--bg:#F3F6F9;--ink:#1E2A38;--mute:#5E6B7A;--line:#DCE3EA;--card:#fff;--teal:#2A9D8F;--teal-d:#1C7A6E;--teal-s:#E2F3F0;--amber:#E9A23B;--chat:#ECE7DF;--sent:#DDF2E3}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;color-scheme:light}
+.wrap{display:flex;gap:40px;justify-content:center;align-items:flex-start;padding:28px 20px;min-height:100%}
+.side{width:300px;padding-top:12px}
+.side h1{font-size:20px;line-height:1.25;margin-bottom:6px}
+.side p.sub{color:var(--mute);margin-bottom:18px}
+.steps{list-style:none;padding:0;margin-bottom:18px}
+.steps li{margin-bottom:4px}
+.steps button{all:unset;cursor:pointer;display:flex;gap:10px;align-items:center;width:100%;padding:7px 10px;border-radius:10px;color:var(--mute)}
+.steps button:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+.steps .n{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:12px;flex:none;background:#fff}
+.steps li.done .n{background:var(--teal-s);border-color:var(--teal);color:var(--teal-d)}
+.steps li.on button{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 0 0 1px var(--line)}
+.steps li.on .n{background:var(--teal);border-color:var(--teal);color:#fff}
+.note{background:#fff;border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.note b{display:block;font-size:13px;margin-bottom:2px}
+.note span{color:var(--mute);font-size:14px}
+.restart{all:unset;cursor:pointer;color:var(--teal-d);font-weight:600;font-size:14px;padding:4px 0}
+.restart:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.phone{width:372px;height:720px;background:#fff;border:10px solid #2B3A4B;border-radius:38px;display:flex;flex-direction:column;overflow:hidden;position:relative;flex:none;box-shadow:0 18px 40px rgba(30,42,56,.14)}
+.status{height:26px;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font-size:12px;font-weight:600;background:#fff;flex:none}
+.screen{display:none;flex:1;flex-direction:column;min-height:0}
+.screen.on{display:flex}
+.bar{padding:10px 14px;display:flex;align-items:center;gap:10px;background:var(--teal-d);color:#fff;flex:none}
+.bar .av{width:34px;height:34px;border-radius:50%;background:#fff;color:var(--teal-d);display:grid;place-items:center;font-weight:700;font-size:13px}
+.bar b{display:block;font-size:15px;line-height:1.2}
+.bar small{opacity:.85;font-size:12px}
+.bar.plain{background:#fff;color:var(--ink);border-bottom:1px solid var(--line)}
+.chat{flex:1;background:var(--chat);padding:14px 12px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.b{max-width:86%;padding:9px 11px;border-radius:12px;background:#fff;box-shadow:0 1px 1px rgba(0,0,0,.08);font-size:14px}
+.b.me{align-self:flex-end;background:var(--sent)}
+.b h3{font-size:15px;margin-bottom:4px}
+.b ul{list-style:none;padding:0;margin:4px 0 8px}
+.b li{padding:2px 0}
+.b time{display:block;text-align:right;color:var(--mute);font-size:11px;margin-top:2px}
+.day{align-self:center;background:#fff;color:var(--mute);font-size:12px;padding:3px 10px;border-radius:10px}
+.cta{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;text-align:center;background:var(--teal);color:#fff;font-weight:600;padding:11px 12px;border-radius:10px}
+.cta:hover{background:var(--teal-d)}
+.cta[disabled]{background:#C8D1DA;cursor:not-allowed}
+.cta:focus-visible,.chip:focus-visible,.scale button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.form{flex:1;overflow:auto;padding:14px;background:var(--bg)}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.card label{display:block;font-weight:600;margin-bottom:8px;font-size:14px}
+.ro{background:var(--bg);border-radius:8px;padding:9px 10px;color:var(--mute);font-size:14px}
+.chips{display:flex;flex-direction:column;gap:8px}
+.chips.row{flex-direction:row}
+.chip{all:unset;box-sizing:border-box;cursor:pointer;flex:1;text-align:center;border:1.5px solid var(--line);border-radius:10px;padding:10px 8px;background:#fff;font-size:14px}
+.chip.sel{border-color:var(--teal);background:var(--teal-s);color:var(--teal-d);font-weight:600}
+.foot{padding:12px 14px;background:#fff;border-top:1px solid var(--line);flex:none}
+.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:18px;text-align:center;background:var(--bg)}
+.scan{width:210px;height:210px;border-radius:16px;background:#fff;border:1px solid var(--line);position:relative;display:grid;place-items:center}
+.scan i{position:absolute;width:30px;height:30px;border:4px solid var(--teal)}
+.scan i:nth-child(1){top:10px;left:10px;border-right:0;border-bottom:0;border-radius:8px 0 0 0}
+.scan i:nth-child(2){top:10px;right:10px;border-left:0;border-bottom:0;border-radius:0 8px 0 0}
+.scan i:nth-child(3){bottom:10px;left:10px;border-right:0;border-top:0;border-radius:0 0 0 8px}
+.scan i:nth-child(4){bottom:10px;right:10px;border-left:0;border-top:0;border-radius:0 0 8px 0}
+.qr{width:96px;height:96px;background:conic-gradient(var(--ink) 25%,#fff 0 50%,var(--ink) 0 75%,#fff 0) 0 0/24px 24px;border:6px solid #fff;outline:2px solid var(--ink)}
+.big{font-size:44px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:1px}
+.pill{background:var(--teal-s);color:var(--teal-d);border-radius:20px;padding:4px 12px;font-size:13px;font-weight:600}
+.route{width:100%;max-width:290px}
+.sum{width:100%;text-align:left}
+.sum div{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)}
+.sum div:last-child{border:0}
+.scale{display:flex;gap:6px;width:100%}
+.scale button{all:unset;box-sizing:border-box;cursor:pointer;flex:1;text-align:center;padding:10px 0;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-weight:600}
+.scale button.sel{border-color:var(--teal);background:var(--teal-s);color:var(--teal-d)}
+.lbl{display:flex;justify-content:space-between;width:100%;color:var(--mute);font-size:12px}
+.coach{flex:none;background:var(--ink);color:#fff;padding:10px 14px;display:flex;gap:10px;align-items:center;font-size:14px}
+.coach .dot{width:10px;height:10px;border-radius:50%;background:var(--amber);flex:none;animation:p 1.4s infinite}
+.hint{position:relative;box-shadow:0 0 0 3px var(--amber),0 0 0 8px rgba(233,162,59,.28)!important;animation:ring 1.4s infinite}
+@keyframes ring{50%{box-shadow:0 0 0 3px var(--amber),0 0 0 13px rgba(233,162,59,0)}}
+@keyframes p{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.hint,.coach .dot{animation:none}}
+@media (max-width:760px){.wrap{flex-direction:column;align-items:center;padding:12px 0}.side{width:auto;padding:0 16px;max-width:372px}.steps,.side p.sub{display:none}.phone{border-width:6px;border-radius:26px;height:calc(100vh - 150px);min-height:600px;max-width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="side">
+    <h1>Campus Cycles: book and ride</h1>
+    <p class="sub">Clickable prototype of the MVP on the hostel to academic block route. Tap the glowing item on the phone. You can also jump to any step.</p>
+    <ol class="steps" id="steps"></ol>
+    <div class="note" id="note"><b></b><span></span></div>
+    <button class="restart" id="restart">Restart prototype</button>
+  </aside>
+
+  <div class="phone" aria-label="Phone prototype">
+    <div class="status"><span id="clock">7:30</span><span>Campus Cycles demo</span></div>
+
+    <!-- 1 broadcast -->
+    <section class="screen" data-s="1">
+      <div class="bar"><div class="av">CC</div><div><b>Campus Cycles</b><small>Broadcast list, 240 students</small></div></div>
+      <div class="chat">
+        <div class="day">Today</div>
+        <div class="b"><h3>Tomorrow’s cycle slots</h3>
+          <ul><li>Route: Hostel and Academic block</li><li>Morning 8:30, Evening 5:30</li><li>Cycles at stands now: Hostel 8, Academic 7</li><li>Book before 9 pm tonight</li></ul>
+          <button class="cta" data-target="1">Book tomorrow’s cycle</button><time>7:30 pm</time></div>
+      </div>
+    </section>
+
+    <!-- 2 form -->
+    <section class="screen" data-s="2">
+      <div class="bar plain"><b>Book a cycle</b></div>
+      <div class="form">
+        <div class="card"><label>Student</label><div class="ro">Demo student, Hostel B (filled in)</div></div>
+        <div class="card"><label>Which way?</label><div class="chips" id="dir">
+          <button class="chip" data-v="Hostel to Academic block">Hostel to Academic block</button>
+          <button class="chip" data-v="Academic block to Hostel">Academic block to Hostel</button></div></div>
+        <div class="card"><label>Which slot?</label><div class="chips row" id="slot">
+          <button class="chip" data-v="Morning 8:30">Morning 8:30</button>
+          <button class="chip" data-v="Evening 5:30">Evening 5:30</button></div></div>
+        <div class="card"><label>Phone for the reminder</label><div class="ro">98•••• ••210 (filled in)</div></div>
+      </div>
+      <div class="foot"><button class="cta" id="submit" disabled>Book my cycle</button></div>
+    </section>
+
+    <!-- 3 confirmation -->
+    <section class="screen" data-s="3">
+      <div class="bar"><div class="av">CC</div><div><b>Campus Cycles</b><small>Bookings</small></div></div>
+      <div class="chat">
+        <div class="b me" id="sent"></div>
+        <div class="b"><h3>Booked</h3>One cycle is reserved for you at the <span id="stand1"></span> stand.<br><br>Tomorrow we will message you your leave-by time.<time>7:32 pm</time></div>
+        <div class="day">Tomorrow morning</div>
+        <button class="cta" data-target="3">Jump to tomorrow morning</button>
+      </div>
+    </section>
+
+    <!-- 4 nudge -->
+    <section class="screen" data-s="4">
+      <div class="bar"><div class="av">CC</div><div><b>Campus Cycles</b><small>Leave-by reminder</small></div></div>
+      <div class="chat">
+        <div class="day">Tomorrow</div>
+        <div class="b"><h3>Leave by <span id="leave"></span></h3>
+          <ul><li>Your cycle is reserved at the <span id="stand2"></span> stand</li><li>Cycles there now: 6 (1 is yours)</li><li>Other stand: 7 cycles</li></ul>
+          <button class="cta" data-target="4">I’m at the stand</button><time>8:05 am</time></div>
+      </div>
+    </section>
+
+    <!-- 5 scan -->
+    <section class="screen" data-s="5">
+      <div class="bar plain"><b>Scan to unlock</b></div>
+      <div class="center">
+        <div class="scan"><i></i><i></i><i></i><i></i><div class="qr"></div></div>
+        <div><b>Cycle #07</b><div style="color:var(--mute)">QR sticker on the handle</div></div>
+        <button class="cta" data-target="5" style="max-width:260px">Scan the QR</button>
+      </div>
+    </section>
+
+    <!-- 6 riding -->
+    <section class="screen" data-s="6">
+      <div class="bar plain"><b>Ride in progress</b></div>
+      <div class="center">
+        <span class="pill">Cycle #07 unlocked</span>
+        <div class="big" id="timer">00:00</div>
+        <svg class="route" viewBox="0 0 290 90" role="img" aria-label="Route from hostel to academic block"><path d="M24 62 C80 62 90 24 150 30 S230 30 266 24" fill="none" stroke="#C8D1DA" stroke-width="5" stroke-linecap="round"/><circle cx="24" cy="62" r="9" fill="#2A9D8F"/><circle cx="266" cy="24" r="9" fill="#fff" stroke="#1E2A38" stroke-width="3"/><text x="24" y="86" font-size="12" text-anchor="middle" fill="#5E6B7A">Hostel</text><text x="262" y="55" font-size="12" text-anchor="middle" fill="#5E6B7A">Academic</text></svg>
+        <div style="color:var(--mute)">Return the cycle at either stand</div>
+        <button class="cta" data-target="6" style="max-width:260px">I’ve reached, end ride</button>
+      </div>
+    </section>
+
+    <!-- 7 pay -->
+    <section class="screen" data-s="7">
+      <div class="bar plain"><b>Ride summary</b></div>
+      <div class="center">
+        <div class="card sum">
+          <div><span>Cycle</span><b>#07</b></div><div><span>Ride time</span><b id="rt">00:00</b></div>
+          <div><span>Waited for a vehicle</span><b>0 min</b></div><div><span>Fare (sample price)</span><b>₹10</b></div>
+        </div>
+        <button class="cta" data-target="7" style="max-width:300px">Pay ₹10 by UPI</button>
+        <small style="color:var(--mute)">Pay per use. Fare shown is only a placeholder to test.</small>
+      </div>
+    </section>
+
+    <!-- 8 feedback -->
+    <section class="screen" data-s="8">
+      <div class="bar plain"><b>One last tap</b></div>
+      <div class="center" id="fb">
+        <b style="font-size:17px">How drained do you feel?</b>
+        <div class="scale" id="scale"><button>1</button><button>2</button><button>3</button><button>4</button><button>5</button></div>
+        <div class="lbl"><span>1 Fresh</span><span>5 Drained</span></div>
+      </div>
+      <div class="center" id="done" style="display:none">
+        <span class="pill">Ride complete</span>
+        <b style="font-size:17px">Thanks, your ride is logged</b>
+        <div class="card sum">
+          <div><span>Booked slot</span><b id="d1"></b></div><div><span>Cycle at the stand</span><b>Yes</b></div>
+          <div><span>Ride time</span><b id="d2"></b></div><div><span>Drained score</span><b id="d3"></b></div>
+        </div>
+        <button class="cta" id="again" style="max-width:260px">Restart prototype</button>
+      </div>
+    </section>
+
+    <div class="coach"><span class="dot"></span><span id="coach"></span></div>
+  </div>
+</div>
+
+<script>
+const T=["Evening broadcast","Book the slot","Booking confirmed","Morning reminder","Scan at the stand","Ride","Pay per use","Quick feedback"];
+const COACH=["Tap “Book tomorrow’s cycle” in the message","Pick a direction, then a slot, then tap “Book my cycle”","Tap “Jump to tomorrow morning”","Tap “I’m at the stand”","Tap “Scan the QR”","Tap “I’ve reached, end ride” when you are ready","Tap “Pay ₹10 by UPI”","Tap a number from 1 to 5","Done. Tap restart to try again"];
+const NOTE=[["Sent each evening on WhatsApp","No app to install. The message also shows how many cycles are at each stand."],["A simple form","Tells us how many students want each slot, so we place the right number of cycles."],["Instant confirmation","The booking sheet logs the promise: stand, slot and time."],["Leave-by plus stand count","This is our honest wait estimate. Students know a cycle is waiting."],["QR on every cycle","Scanning logs the cycle, the stand and the start time. No GPS needed yet."],["Timer only","Start and end scans give ride time. A caretaker moves cycles between slots."],["Pay per use","A sample fare to test willingness to pay. UPI link, no wallet to build."],["One tap on energy","Tells us if the walk was avoided and the student arrived fresh."]];
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let cur=1,dir=null,slot=null,secs=0,tm=null,rideTxt="00:00";
+const stand=()=>dir&&dir.startsWith("Academic")?"Academic block":"Hostel";
+const leave=()=>slot&&slot.startsWith("Evening")?"5:20 pm":"8:20 am";
+function renderSteps(){$("#steps").innerHTML=T.map((t,i)=>`<li class="${i+1===cur?"on":i+1<cur?"done":""}"><button data-go="${i+1}"><span class="n">${i+1<cur?"✓":i+1}</span>${t}</button></li>`).join("")}
+function hint(){$$(".hint").forEach(e=>e.classList.remove("hint"));let el=null;
+ if(cur===2){el=!dir?$("#dir .chip"):!slot?$("#slot .chip"):$("#submit")}
+ else if(cur===8){el=$("#scale button")}
+ else el=$(`[data-target="${cur}"]`);
+ if(el)el.classList.add("hint");$("#coach").textContent=COACH[Math.min(cur-1,8)]}
+function go(n){clearInterval(tm);cur=n;
+ if(n>=3&&!dir)dir="Hostel to Academic block";if(n>=3&&!slot)slot="Morning 8:30";
+ $$(".screen").forEach(s=>s.classList.toggle("on",+s.dataset.s===n));
+ $("#sent").innerHTML=`Booked: ${dir}, tomorrow ${slot}<time>7:31 pm</time>`;
+ $("#stand1").textContent=stand();$("#stand2").textContent=stand();$("#leave").textContent=leave();
+ if(n===6){secs=0;$("#timer").textContent="00:00";tm=setInterval(()=>{secs++;$("#timer").textContent=fmt(secs);rideTxt=fmt(secs)},1000)}
+ if(n===7){$("#rt").textContent=secs?fmt(secs):"04:12"}
+ if(n===8){$("#fb").style.display="flex";$("#done").style.display="none";$$("#scale button").forEach(b=>b.classList.remove("sel"))}
+ const k=NOTE[n-1];$("#note b").textContent=k[0];$("#note span").textContent=k[1];
+ $("#clock").textContent=n<=3?"7:30":"8:"+(n===4?"05":n===5?"10":"20");
+ renderSteps();hint()}
+const fmt=s=>String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+function pick(group,setter){$$(group+" .chip").forEach(c=>c.onclick=()=>{$$(group+" .chip").forEach(x=>x.classList.remove("sel"));c.classList.add("sel");setter(c.dataset.v);$("#submit").disabled=!(dir&&slot);hint()})}
+pick("#dir",v=>dir=v);pick("#slot",v=>slot=v);
+$$("[data-target]").forEach(b=>b.onclick=()=>go(+b.dataset.target+1));
+$("#submit").onclick=()=>go(3);
+$$("#scale button").forEach(b=>b.onclick=()=>{b.classList.add("sel");$("#d1").textContent=slot;$("#d2").textContent=secs?fmt(secs):"04:12";$("#d3").textContent=b.textContent+" of 5";
+ setTimeout(()=>{$("#fb").style.display="none";$("#done").style.display="flex";$("#coach").textContent=COACH[8];$$(".hint").forEach(e=>e.classList.remove("hint"))},350)});
+function reset(){dir=slot=null;secs=0;$$(".chip").forEach(c=>c.classList.remove("sel"));$("#submit").disabled=true;go(1)}
+$("#restart").onclick=reset;$("#again").onclick=reset;
+$("#steps").onclick=e=>{const b=e.target.closest("[data-go]");if(b)go(+b.dataset.go)};
+go(1);
+</script>
+</body>
+</html>
